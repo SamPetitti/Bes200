@@ -17,6 +17,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.IO;
 using LibraryApi.Mappers;
+using AutoMapper;
 
 namespace LibraryApi
 {
@@ -44,6 +45,7 @@ namespace LibraryApi
             );
 
             services.AddScoped<IMapBooks, EfBookMapper>();
+            services.AddAutoMapper(typeof(Startup));
 
 
             services.AddSwaggerGen(c =>
