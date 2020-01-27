@@ -7,18 +7,21 @@ using System.Threading.Tasks;
 using LibraryApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using LibraryApi.Mappers;
 
 namespace LibraryApi.Controllers
 {
     public class BooksController : Controller
     {
         LibraryDataContext Context;
+        IMapBooks BooksMapper;
 
-        public BooksController(LibraryDataContext context)
+        public BooksController(LibraryDataContext context, IMapBooks booksMapper)
         {
-            Context = context; 
-            
+            Context = context;
+            BooksMapper = booksMapper;
         }
+
 
         /// <summary>
         /// Gives you all the books that are currently in inventory
@@ -109,27 +112,11 @@ namespace LibraryApi.Controllers
 
 
         [HttpGet("/books/{id:int}", Name = "books#getbookbyid")]
-        public async Task<IActionResult> GetBookById(int id)
+        public async Task<ActionResult<GetBookDetailsResponse>> GetBookById(int id)
         {
-            var response = await GetBooksInInventory()
-                .Where(b => b.Id == id)
-                .Select(b => new GetBookDetailsResponse
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    Author = b.Author,
-                    Genre = b.Genre,
-                    NumberOfPages = b.NumberOfPages
-                }).SingleOrDefaultAsync();
+            GetBookDetailsResponse response = await BooksMapper.GetBooksById(id);
 
-            if (response == null)
-            {
-                return NotFound("No book with that Id!"); // the string is optional
-            }
-            else
-            {
-                return Ok(response);
-            }
+            return this.Maybe(response);
 
         }
 
